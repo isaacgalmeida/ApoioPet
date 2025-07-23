@@ -2,7 +2,8 @@
 
 22/07/2025
 
-Correões em funão da alteração da estrutura do banco (tabela usuarios).
+Correções em função da alteração da estrutura do banco (tabela usuarios).
+Ajuste na visualizaçao de mapa estratégico.
 v1.0.3
 
 02/07/2025

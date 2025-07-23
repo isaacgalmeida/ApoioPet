@@ -22,7 +22,7 @@ from project.models import planejamentos, Unidades, planejamentos_objetivos, eix
                             
 from datetime import datetime as dt
 
-import ast
+import ast, json
 
 planejamento = Blueprint('planejamento',__name__, template_folder='templates')
 
@@ -61,11 +61,11 @@ def mapa_estrategico():
     
     #pega valores
     valores = planejamento_inst.valores
-    lista_valores = ast.literal_eval(valores)                    
+    # lista_valores = ast.literal_eval(valores)
     
     #pega resultados
     resultados = planejamento_inst.resultados_institucionais
-    lista_resultados = ast.literal_eval(resultados)  
+    # lista_resultados = ast.literal_eval(resultados) 
                             
     # pega objetivos por eixo temático
     
@@ -86,8 +86,8 @@ def mapa_estrategico():
                         
     
     return render_template('mapa_estrategico.html', planejamento = planejamento_inst,
-                                                    valores = lista_valores,
-                                                    resultados = lista_resultados,
+                                                    valores = valores,
+                                                    resultados = resultados,
                                                     objetivos = objetivos, 
                                                     lista_eixo = lista_eixo)                    
     

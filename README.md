@@ -1,5 +1,7 @@
 # ApoioPet 1.0 - Consultas ao banco de dados do PGD Petrvs
 
+A imagem docker está disponível em https://hub.docker.com/r/cimei/apoiopet
+
 **Planos de entregas** 
 
   - Listagem de todos os PEs cadastrados contendo:
