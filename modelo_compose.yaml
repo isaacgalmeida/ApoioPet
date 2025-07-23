@@ -1,0 +1,39 @@
+services:
+  web:
+    image: cimei/sisgedem_2:latest
+    container_name: sisgedem_2
+    build: .
+    restart: always
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./:/app
+    # Substitua as ocorrências <...> abaixo pelos valores do seu caso concreto
+    environment:
+      FLASK_DEBUG: 1
+      # Variávels do Banco de Dados
+      DB_PORT: "1433"
+      DB_DATABASE: "DBSISGEDEM"
+      DB_SERVER: "<nome do servidor>"  # Use "host.docker.internal" para banco local ou o nome do servidor onde está o banco
+      DB_USER: "<usuário do banco>"
+      DB_PWD: "<senha do usuário do banco>"
+      # Variáveis da conta de e-mail
+      MAIL_SERVER: "<servidor de e-mail>"
+      MAIL_PORT: "<porta>"
+      MAIL_USE_TLS: "True"
+      MAIL_USER: "<conta de e-mail>"
+      MAIL_PWD: "<senha da conta de e-mail>"
+      # Variáveis da conexão LDAP
+      LDAP_URL: "<servidor ldap>:<porta>" 
+      STR_CONEXAO: "ou=<...>,dc=<...>,dc=<...>" 
+      STR_SEARCH: "dc=<...>,dc=<...>" 
+      STR_ATRIBUTO: "mail"
+      # Variáveis da API de recebimento dos dados
+      APIPGD_URL: "<url da API>"  # use a de homologação para testes
+      APIPGD_AUTH_USER: "<credencial API>"
+      APIPGD_AUTH_PASSWORD: "<senha da credencial API>"
+      APIPGD_SISTEMA_GERADOR: ""
+      # Variáveis de uso interno
+      REFERENCIA: "SIORG"
+      AUTORIZADORA: "1"  # use código númerico da unidade autorizadora
+      QTD_ACUMULADO: "25" # quantidade de elementos acumulados para envio

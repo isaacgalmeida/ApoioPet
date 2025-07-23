@@ -1,0 +1,67 @@
+{% extends "template_gov.html" %}
+{% block content %}
+<div class="container">
+
+<div class="jumbotron">
+
+  <h4>Avaliações no Plano de Trabalho selecionado</h4>
+
+  <caption>
+    <div class="row">
+        <div class="col">
+          {% if quantidade == 1 %}
+            <p>Lista de <b>{{quantidade}}</b> avaliação. </p>
+          {% else %}
+            <p>Lista de <b>{{quantidade}}</b> avaliações. </p>
+          {% endif %}
+        </div>
+    </div>
+  </caption>
+
+  <div class="container" style="overflow-y:auto; height:400px">
+
+    <table class="table table-striped table-hover table-sm">
+      <caption>Avaliações</caption>
+      <thead>
+        <tr>
+          <th scope="col"><p align = "center">#</p></th>
+          <th scope="col"><p align = "center">Ini.-Fim do PT</p></th>
+          <th scope="col"><p align = "center">Data</p></th>
+          <th scope="col"><p align = "center">Nota</p></th>
+          <th scope="col"><p align = "left">Avaliador</p></th>
+          <th scope="col"><p align = "left">Avaliado</p></th>
+          <th scope="col"><p align = "center">Recurso</p></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for a in avaliacoes_pt %}
+
+        <tr>
+          
+          <th scope="row"><p align = "center">{{avaliacoes_pt.index(a) + 1}}</p></th>
+          <td><p align = "center"> {{a.data_inicio.strftime('%d/%m/%Y')}} - {{a.data_fim.strftime('%d/%m/%Y')}}  </p></td>
+          <td><p align = "center"> {{a.data_avaliacao.strftime('%d/%m/%Y')}} </p></td>
+          <td><p align = "center"> {{a.nota.split('"')[2][:-1]}} </p></td>
+          <td><p align = "left"> {{a.avaliador}} </p></td>
+          <td><p align = "left"> {{a.avaliado}} </p></td>
+          <td><p align = "center"> 
+            {% if a.recurso != None %}
+              {{a.recurso}}            
+            {% else %}
+              NÃO HÁ
+            {% endif %}
+          </p></td>
+        </tr>
+
+        {% endfor %}
+
+      </tbody>
+    </table>
+
+  </div>
+
+</div>
+
+</div>
+{% endblock %}

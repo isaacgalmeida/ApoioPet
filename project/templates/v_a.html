@@ -1,0 +1,27 @@
+{% extends "template_gov.html" %}
+{% block content %}
+
+<div class="container">
+  <div class="jumbotron">
+    
+      <h3> FLASK_DEBUG: {{'FLASK_DEBUG'|verifica_serv_bd}} </h3>
+      <h3> DB_PORT: {{'DB_PORT'|verifica_serv_bd}} </h3>
+      <h3> DB_DATABASE: {{'DB_DATABASE'|verifica_serv_bd}} </h3>
+      <h3> DB_SERVER: {{'DB_SERVER'|verifica_serv_bd}} </h3>
+      <h3> DB_USER: {{'DB_USER'|verifica_serv_bd}} </h3>
+      <h3> DB_PWD: {{'DB_PWD'|verifica_serv_bd}} </h3>
+      <h3> LDAP_URL: {{'LDAP_URL'|verifica_serv_bd}} </h3>
+      <h3> STR_CONEXAO: {{'STR_CONEXAO'|verifica_serv_bd}} </h3>
+      <h3> STR_SEARCH: {{'STR_SEARCH'|verifica_serv_bd}} </h3>
+      <h3> STR_ATRIBUTO: {{'STR_ATRIBUTO'|verifica_serv_bd}} </h3>
+      <h3> USER_LIST: {{'USER_LIST'|verifica_serv_bd}} </h3>
+      <h3> USER_LIST_PASS: {{'USER_LIST_PASS'|verifica_serv_bd}} </h3>
+   
+    <p></p>
+
+    
+
+  </div>
+</div>
+
+{% endblock %}

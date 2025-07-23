@@ -1,0 +1,163 @@
+{% extends "template_gov.html" %}
+{% block content %}
+
+<div class="col mb-5">
+  <div class="br-breadcrumb">
+    <ul class="crumb-list">
+      <li class="crumb home"><a class="br-button circle" href="{{url_for('core.inicio')}}"><span class="sr-only">Página inicial</span><i class="fa fa-home"></i></a></li>
+      <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Planos de Entrega</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="container">
+<div class="jumbotron">
+
+  <div class="row">
+    <div class="col-9">
+      <h4>Planos de Entregas</h4>
+    </div>
+  </div>
+
+  <caption>
+    <div class="row">
+        <div class="col-8">
+          <p>Lista de <b>{{quantidade}}</b> planos. 
+        </div>
+    </div>
+  </caption>
+
+  <div class="container" style="overflow-y:auto;">
+
+    <table id="table"
+          data-toggle="table"
+          data-filter-control="true"
+          data-show-search-clear-button="true"
+          data-sortable="true"
+          classes="table-sm"
+          data-show-columns="true"
+          data-show-columns-toggle-all="true"
+          class="table table-striped table-hover table-sm">
+      <caption>Planos de Entregas</caption>
+      <thead>
+        <tr>
+          <th scope="col"><p align = "center">#</p></th>
+          <th scope="col" data-field="Unidade" data-filter-control="input" data-sortable="true" data-filter-control-placeholder="Termo de pesquisa..."><p align = "center">Unidade</p></th>
+          <th scope="col" data-field="Status" data-filter-control="input" data-sortable="true" data-filter-control-placeholder="Termo de pesquisa..."><p align = "center">Status</p></th>
+          <th scope="col" data-sortable="true"><p align = "center">Início</p></th>
+          <th scope="col" data-sortable="true"><p align = "center">Fim</p></th>
+          <th scope="col"><p align = "center">Entregas</p></th>
+          <th scope="col"><p align = "center">&emsp;PTs&emsp;</p></th>
+          <th scope="col"><p align = "center">Avaliação</p></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for p in planos_entregas_todos %}
+
+        <tr>
+          <th scope="row"><p align = "center"> 
+            {{planos_entregas_todos.index(p) + 1}}
+          </p></th>
+          <td><p align = "center"> 
+              {% if p.sigla_pai %}
+                {{p.sigla_pai}}/{{ p.sigla }}
+              {% else %}
+                {{ p.sigla }}
+              {% endif %}   
+              
+              {% if p.deleted_at %}
+                ({{p.deleted_at.strftime('%d/%m/%Y')}})
+              {% endif %}
+
+          </p></td>
+          <td><p align = "center">
+              {% if p.vencido == 's' and p.status == 'ATIVO' %} 
+                <span class="text-danger"><b>{{p.status}}</b></span>
+              {% elif p.status == 'INCLUIDO' %}
+                <span class="text-primary">{{p.status}}</span>
+              {% elif p.status == 'CONCLUIDO' %}
+                <span class="text-success">{{p.status}}</span>  
+              {% elif p.status == 'HOMOLOGANDO' %}
+                <span class="text-warning">{{p.status}}</span>  
+              {% else %}
+                <span class="text-dark">{{p.status}}</span>
+              {% endif %}
+          
+          </p></td>
+          <td><p align = "center"> {{p.data_inicio.strftime('%d/%m/%Y')}} </p></td>
+          <td><p align = "center"> {{p.data_fim.strftime('%d/%m/%Y')}} </p></td>
+
+         <td><p align = "center"> 
+                {% if p.qtd_entregas == None %}
+                  0
+                {% else %}
+                  <a style="text-decoration: none" href="{{url_for('entregas.consulta_entregas',peId=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
+                     {{p.qtd_entregas}} </a> 
+                {% endif %}
+     
+          </p></td>
+
+          <td>  
+            <p align = "center"> 
+              {% if p.qtd_planos_trab == None or p_qtd_planos_trab == 0 %}
+                Não há
+              {% else %}
+                <a style="text-decoration: none" href="{{url_for('entregas.consulta_pts',peId=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
+                  {{p.qtd_planos_trab}}</a>
+              {% endif %}
+
+            </p>
+          </td> 
+          
+          {% if p.nota != None %}
+            <td><p align = "center">
+
+              <a href="#" data-bs-toggle='modal' data-bs-target='#aval_modal{{planos_entregas_todos.index(p) + 1}}'><i class="fa-solid fa-check"></i></a></abbr>
+              
+                {# modal visualização da avaliação do PE #}
+                <div class="modal fade" tabindex="-1" role="dialog" id="aval_modal{{planos_entregas_todos.index(p) + 1}}">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h4 class="modal-title">Avaliação do PE {{planos_entregas_todos.index(p) + 1}}</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p>Data: <b>{{ p.data_avaliacao.strftime('%d/%m/%Y') }}</b></p>
+                        <p>Parecer: <b>{{ p.nota }}</b></p>
+                        <p>Justificativa: <b>{{ p.justificativa }}</b></p>
+                      </div>
+                      <div class="modal-footer">
+                      </div>
+                    </div>
+                  </div>
+                </div>                      
+
+            </p></td>
+            
+          {% else %}
+            <td>
+              
+              <p align = "center">
+                Não há
+              </p>
+             
+            </td>
+            
+          {% endif%}
+              
+        </tr>
+
+        {% endfor %}
+
+      </tbody>
+    </table>
+
+  </div>
+
+</div>
+</div>
+
+{% endblock %}

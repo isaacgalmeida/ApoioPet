@@ -1,0 +1,191 @@
+{% extends "template_gov.html" %}
+{% block content %}
+
+<div class="col mb-5">
+  <div class="br-breadcrumb">
+    <ul class="crumb-list">
+      <li class="crumb home"><a class="br-button circle" href="{{url_for('core.inicio')}}"><span class="sr-only">Página inicial</span><i class="fa fa-home"></i></a></li>
+      <li class="crumb"><i class="icon fa fa-chevron-right"></i><a href="{{url_for('entregas.lista_pe')}}">Planos de Entregas</a></li>
+      <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Consulta Entregas</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="container">
+  
+  <h4>Entregas do PE</h4>
+  <div class="row">
+    <div class="col">
+      <p>Unidade: <b>{{ plano_entregas.sigla }}</b></p>
+    </div>
+
+    <div class="col">
+      Vigência: <b>{{plano_entregas.data_inicio.strftime('%d/%m/%Y')}} a {{plano_entregas.data_fim.strftime('%d/%m/%Y')}}</b>
+    </div>
+    <div class="col">
+      Situação: <b>{{ plano_entregas.status }}</b> 
+    </div>
+  </div>
+
+
+  {% for e in entregas %}
+
+    <div class="card card border-secondary">
+      
+      <div class="card-header">
+        <div class="row justify-content-between">
+          <div class="col-10">
+            Entrega: <b>{{e.descricao}}</b>
+          </div>
+          <div class="col-2 text-right">
+            <b>{{entregas.index(e) + 1}}</b>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            Descrição: <b>{{e.descricao_entrega}}</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+
+        <div class="row justify-content-center">
+          <div class="col-4 text-center">
+            {% if e.data_fim > plano_entregas.data_fim %} 
+              Vigência: <span class="text-danger"><b>{{e.data_inicio.strftime('%d/%m/%Y')}} a {{e.data_fim.strftime('%d/%m/%Y')}}</b></span>
+            {% else %}  
+              Vigência: <b>{{e.data_inicio.strftime('%d/%m/%Y')}} a {{e.data_fim.strftime('%d/%m/%Y')}}</b>
+            {% endif %}  
+          </div>
+          <div class="col-4 text-center">
+            Meta: <b>{{ e.meta|dic_value }} ({{ e.meta|dic_key }})</b> 
+          </div>
+          <div class="col-4 text-center">
+            {% if e.destinatario == None %}
+              <b>Destinatário não cadastrado</b>
+            {% else %}
+              Destinatário: <b>{{e.destinatario}}</b> 
+            {% endif %}
+          </div>
+        </div>
+        
+        <br>
+
+        {#
+        <div class="row justify-content-center">
+          <div class="col-5 text-center">  
+            {% if e.relatorio %}
+
+                Possui relatório: <a href="#" data-bs-toggle='modal' data-bs-target='#rel_modal{{e.planoEntregasEntregasId}}' class="btn btn-outline-primary btn-sm" role="button">
+                  <abbr title="O quanto esta, ou estas, unidades comprometeram de sua capacidade nesta entrega."><i class="fa-solid fa-check"></i></i></abbr>
+                </a>
+                    
+                    <!-- modal visualização de programas de gestão da unidade -->
+
+                    <div class="modal fade" tabindex="-1" role="dialog" id="rel_modal{{e.planoEntregasEntregasId}}">
+                      <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h4 class="modal-title">Relatório da entrega <b>{{ e.nome }}</b></h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            {{ e.relatorio }}
+                          </div>
+                          <div class="modal-footer">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+            {% else %}
+              Possui relatório: <i class="fa-solid fa-xmark"></i>
+            {% endif%}
+          </div>  
+          <div class="col-5 text-center">
+            {% if e.unids_qtd == None %}
+
+              <b>Nenhuma unidade atuando na entrega</b>
+
+            {% else %}
+
+              <a href="#" data-bs-toggle='modal' data-bs-target='#unids_modal{{e.planoEntregasEntregasId}}' class="btn btn-outline-primary btn-sm" role="button">
+                <abbr title="O quanto esta, ou estas, unidades comprometeram de sua capacidade nesta entrega."><b>{{e.unids_qtd}}</b></i></abbr>
+              </a> Unidade(s) atuando na Entrega
+                  
+                   <!-- modal visualização de programas de gestão da unidade -->
+
+                  <div class="modal fade" tabindex="-1" role="dialog" id="unids_modal{{e.planoEntregasEntregasId}}">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Unidades atuando na entrega <b>{{ e.nome }}</b></h4>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+
+                          <table class="table table-striped table-hover table-sm">
+                            <thead>
+                              <tr>
+                                <th scope="col"><p align = "center">Unidade</p></th>
+                                <th scope="col"><p align = "center">Trabalhos</p></th>
+                                <th scope="col"><p align = "center">Esforço</p></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for item in esforco_unid %}
+                                {% if item.planoEntregasEntregasId ==  e.planoEntregasEntregasId%}
+                                  <tr>
+                                    <td><p align = "center">{{item.undSiglaCompleta}}</p></td>
+                                    <td><p align = "center">{{item.trabs_qtd}}</p></td>
+                                    <td><p align = "center">{{(item.esforco_soma / item.qtd_pessoas)|decimal_com_virgula}} %</p></td>
+                                  </tr>  
+                                {% endif %}
+                              {% endfor %}    
+                            </tbody>
+                          </table>  
+
+
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+          {% endif %}
+          </div>
+        </div>  
+        #}
+
+        <br>
+
+        <div class="row justify-content-center">
+
+          <div class="col-10">
+            {% if e.progresso_realizado != None %}
+              Progresso da Entrega
+              <div class="progress" style="height: 25px;">
+                <div class="progress-bar bg-info" role="progressbar" aria-label="Cumprimento" style="width: {{ e.progresso_realizado|round|int }}%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                  <b><span class="text-dark">{{ e.progresso_realizado|round|int }}%</span></b>
+                </div>
+              </div>
+            {% endif %}
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="modal-footer"></div>
+             
+    </div>
+
+  {% endfor %}
+
+
+</div>
+{% endblock %}

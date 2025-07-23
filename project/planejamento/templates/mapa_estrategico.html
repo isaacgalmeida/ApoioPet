@@ -1,0 +1,147 @@
+{% extends "template_gov.html" %}
+{% block content %}
+
+<div class="col mb-5">
+  <div class="br-breadcrumb">
+    <ul class="crumb-list">
+      <li class="crumb home"><a class="br-button circle" href="{{url_for('core.inicio')}}"><span class="sr-only">Página inicial</span><i class="fa fa-home"></i></a></li>
+      <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Mapa Estratégico</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+  <div class="card">
+
+    <div class="card-header">
+      <div class="d-flex flex-column flex-md-row justify-content-between">
+        <h4 class="header-list">Mapa Estratégico - {{planejamento.nome}}</h4>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+          <div class="row justify-content-around align-items-center">
+            <div class="col-6">
+              <div class="card">
+                <div class="card-header"><b>Missão</b></div>
+                <div class="card-body">
+                  {{ planejamento.missao}}
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="card">
+                <div class="card-header"><b>Visão</b></div>
+                <div class="card-body">
+                  {{ planejamento.visao}}
+                </div>
+              </div>
+            </div>
+          </div>
+
+      <br>
+
+      <div class="card">
+        <div class="card-header"><b>Resultados</b></div>
+        <div class="card-body">
+
+          <div class="row justify-content-around align-items-center">
+
+          {% if resultados == [] %}
+            Sem resultados cadastrados
+          {% else %}     
+            {% for r in resultados %}
+
+              <div class="col-3 text-center">
+                <div class="card border-0">
+                  <div class="card-body">
+                    <span class="br-tag bg-orange-vivid-40">
+                      <i class="fas fa-file-circle-check" aria-hidden="true"></i><span>{{ r }}</span> 
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+            {% endfor %}
+          {% endif %}  
+
+        </div>
+
+        </div>
+      </div>
+
+      <br>
+
+      <div class="card">
+        <div class="card-header"><b>Objetivos por Eixo Temático</b></div>
+        <div class="card-body">
+
+          <div class="row justify-content-around align-items-center">
+
+            {% for e in lista_eixo %}
+
+              <div class="col-3 text-center">
+      
+                    <div class="card text-center border-0">
+                      <div class="card-body">
+                        <h4 class="card-title" style="color:{{e[2]}}";> {{ e[0] }} - {{ e[1] }} </h4>
+      
+                        <ul class="list-group list-group-flush"></ul>
+                          {% for o in objetivos %}
+                            {% if o.eixo_nome == e[0] %}
+                          
+                              <li class="list-group-item">
+                                <div class="card">
+                                  <div class="card-body">
+                                    <p class="card-text">{{ o.nome }}</p>
+                                    <p class="card-text">{{ o.fundamentacao }}</p>
+                                  </div>
+                                </div>
+                              </li>
+                          
+                            {% endif %}
+                          {% endfor %}
+                        </ul>
+      
+                      </div>
+                    </div>  
+      
+              </div>     
+              
+            {% endfor %}
+
+          </div>
+
+        </div>
+      </div>
+
+      <br>
+
+      <div class="card">
+        <div class="card-header"><b>Valores</b></div>
+        <div class="card-body">
+
+          <div class="row justify-content-around align-items-center">
+
+          {% for v in valores %}
+
+            <div class="col-3 text-center" style="height: 50px;">
+              <span class="br-tag bg-mint-cool-vivid-40">
+                <i class="fa-regular fa-gem" aria-hidden="true"></i><span>&emsp;{{ v['value'] }}</span> 
+              </span>
+            </div>
+            
+          {% endfor %}
+
+        </div>
+
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+  
+  
+{% endblock %}

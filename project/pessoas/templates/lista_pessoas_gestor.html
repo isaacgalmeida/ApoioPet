@@ -1,0 +1,153 @@
+{% extends "template_gov.html" %}
+{% block content %}
+
+<div class="col mb-5">
+  <div class="br-breadcrumb">
+    <ul class="crumb-list">
+      <li class="crumb home"><a class="br-button circle" href="{{url_for('core.inicio')}}"><span class="sr-only">Página inicial</span><i class="fa fa-home"></i></a></li>
+      {% if tipo == "pesq" %}
+        <li class="crumb"><i class="icon fa fa-chevron-right"></i><a href="{{url_for('pessoas.lista_pessoas')}}">Pessoas</a></li>
+        <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Pessoas (Filtro)</span></li>
+      {% else %}    
+        <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Pessoas</span></li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+
+<!-- <div class="jumbotron"> -->
+  <div class="card">
+    <div class="card-header">
+      <div class="d-flex flex-column flex-md-row justify-content-between">
+        <h4 class="header-list">Lista das Pessoas 
+          {% if tipo == "inst" %}na Instituição
+          {% elif tipo == "pesq" %} 
+            <br><small>Filtro aplicado: Nome <b>"{{p_nome}}"</b>, Unidade <b>"{{p_unid}}"</b>, Atrib. <b>"{{p_atrib}}"</b>, Sit. <b>"{{p_situ}}"</b>, Perf. <b>"{{p_perf}}"</b>
+          {% else %}na Unidade
+          {% endif %}</h4>
+
+        <div class="d-flex justify-content-around">
+
+            <a href="{{url_for('pessoas.lista_pessoas_filtro')}}" class="br-button secondary mr-3" role="button"><i class="fa fa-filter" aria-hidden="true"></i>Filtro</a>
+
+        </div>
+      </div>
+      
+    </div>
+    <div class="card-body">
+       
+        {% if tipo == "inst" %}
+          <p><span class="badge text-bg-primary">{{qtd_pessoas}}</span> pessoas na Instituição (<span class="badge text-bg-warning">{{quantidade}}</span> registros na lista)
+        {% elif tipo == "pesq" %}
+          <span class="badge text-bg-warning">{{quantidade}}</span> registros na lista, conforme filtro aplicado  
+        {% endif %}
+        
+      </p>
+      <table style="width: 100%" id="table"
+        data-toggle="table"
+        data-filter-control="true"
+        data-show-search-clear-button="true"
+        data-sortable="true"
+        classes="table-sm"
+        data-show-columns="true"
+        data-show-columns-toggle-all="true"
+        class="table table-striped table-hover table-sm">
+        <colgroup>
+          <col span="1" style="width: 2%;">
+          <col span="1" style="width: 18%;">
+          <col span="1" style="width: 10%;">
+          <col span="1" style="width: 10%;">
+          <col span="1" style="width: 10%;">
+          <col span="1" style="width: 10%;">
+          <col span="1" style="width: 10%;">
+          <col span="1" style="width: 10%;">
+          <col span="1" style="width: 10%;">
+          <col span="1" style="width: 10%;">
+       </colgroup>
+
+        <caption>Pessoas</caption>
+        <thead>
+          <tr>
+            <th scope="col"><p align = "center">#</p></th>
+            <th scope="col" data-sortable="true"><p align = "center">Nome</p></th>
+            <th scope="col" data-sortable="true"><p align = "center">Data Nasc.</p></th>
+            <th scope="col" data-sortable="true"><p align = "center">Mat.</p></th>
+            <th scope="col" data-sortable="true"><p align = "center">E-mail</p></th>
+            <th scope="col" data-field="undSigla" data-filter-control="input" data-sortable="true"><p align = "center">Unidade</p></th>
+            <th scope="col" data-field="tfnDescricao" data-filter-control="input" data-sortable="true"><p align = "center">Atribuição</p></th>
+            <th scope="col" data-field="spsDescricao" data-filter-control="input" data-sortable="true"><p align = "center">Situação</p></th>
+            <th scope="col" data-field="tvnDescricao" data-filter-control="input" data-sortable="true"><p align = "center">Perfil</p></th>
+            <th scope="col" data-sortable="true"><p align = "center">PTs</p></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in pessoas.items %}
+
+          <tr>
+            <th scope="row"> <p align = "center">{{(pessoas.page - 1) * pessoas.per_page + pessoas.items.index(p) + 1}} </a> </p></th>
+            <td><p align = "center"> {{p.nome}} </p></td>
+            <td><p align = "center"> {% if p.data_nascimento == None or p.data_nascimento == '' %}N.I.{% else %}{{p.data_nascimento.strftime('%d/%m/%Y')}}{%endif%} </p></td>
+            <td><p align = "center"> {{p.matricula}} </p></td>
+            <td><p align = "center"> {% if p.email == None %}N.I.{% else %}{{p.email}}{% endif %} </p></td>
+            <td><p align = "center"> {% if p.sigla == None %}N.I.{% else %}{{p.sigla}}{% endif %} </p></td>
+            <td><p align = "center"> {% if p.atribuicao == None %}N.I.{% else %}{{p.atribuicao}}{% endif %} </p></td>
+            <td><p align = "center"> {{p.situacao_funcional}} </p></td>
+            <td><p align = "center"> 
+              {% if p.perfil == None %}
+                N.I.
+              {% else %}
+                {% if p.perfil[:6] == 'Perfil' %}
+                  {{ p.perfil[7:] }}
+                {% else %}  
+                  {{p.perfil}}
+                {% endif %}  
+              {% endif %} 
+            </p></td>
+            <td>  
+              <p align = "center"> 
+                {% if p.qtd_planos_trab == None or p.qtd_planos_trab == 0 %}
+                  Não há
+                {% else %}
+                  <a style="text-decoration: none" href="{{url_for('pessoas.consulta_pts_pessoa',pessoa_id=p.id)}}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">
+                    {{p.qtd_planos_trab}}</a>
+                {% endif %}
+  
+              </p>
+            </td>  
+
+          </tr>
+
+          {% endfor %}
+
+        </tbody>
+      </table>
+      <nav class="br-pagination"  aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+      
+          {% for page_num in pessoas.iter_pages(left_edge=1,left_current=1,right_current=2,right_edge=1) %}
+            {% if page_num %}
+              {% if pessoas.page == page_num %}
+                <li>
+                    <a class="page active" href="{{url_for('pessoas.lista_pessoas',page=page_num)}}">{{page_num}}</a>
+                </li>
+              {% else %}
+                <li>
+                    <a class="page" href="{{url_for('pessoas.lista_pessoas',page=page_num)}}">{{page_num}}</a>
+                </li>
+              {% endif %}
+            {% else %}
+              <span class="page">…</span>
+            {% endif %}
+      
+          {% endfor %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+  
+  
+
+
+
+<!-- </div> -->
+{% endblock %}

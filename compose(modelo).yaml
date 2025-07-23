@@ -1,0 +1,27 @@
+# Aqui estão as variáveis de ambiente a serem carregadas quandno da construção da imagem
+# Crie o seu arquivo compose.yaml a partir deste modelo
+
+services:
+  web:
+    container_name: apoiopet
+    build: .
+    restart: always
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./:/app
+    environment:
+      FLASK_DEBUG: 1
+      DB_PORT: "3306"
+      DB_DATABASE: "<nome do banco de dados do seu tenant>"
+      DB_SERVER: '<servidor onde o banco está hospedado>'
+      DB_USER: "<usuário do banco>"
+      DB_PWD: "<senha do banco>"
+      LDAP_URL: "<servidor:porta do ldap da instituição>" 
+      STR_CONEXAO: "<ou e dc utilizados>" 
+      STR_SEARCH: "<dc utilizado>" 
+      STR_ATRIBUTO: "<atributo de validação>"
+      USER_LIST: "<lista de usuários (apelidos) para acesso direto>"
+      USER_LIST_PASS: "<senha para acesso direto>"
+
+

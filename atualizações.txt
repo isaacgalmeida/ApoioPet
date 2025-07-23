@@ -1,0 +1,16 @@
+## Atualizações ##
+
+22/07/2025
+
+Correões em funão da alteração da estrutura do banco (tabela usuarios).
+v1.0.3
+
+02/07/2025
+
+Consulta as variáveis de ambientes, correção nas consultas onde o somatório não batia com a lista correspondente.
+v1.0.2
+
+05/06/2025
+
+Correção do nome do campo email na consulta ao LDAP.
+

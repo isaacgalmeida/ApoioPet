@@ -1,0 +1,68 @@
+{% extends "template_gov.html" %}
+{% block content %}
+
+{% if current_user.is_authenticated %}
+
+<div class="row mt-5">
+  <div class="d-flex justify-content-center  flex-wrap">
+
+    {% with 
+      icon="fa-map", 
+      title="Mapa Estratégico",
+      description="Visualização conjunta dos dados do Plano Institucional.",
+      link=url_for("planejamento.mapa_estrategico")
+    %}
+      {% include "card_menu.html" %}
+    {% endwith %}
+    
+    {% with 
+      icon="fa-file-pen", 
+      title="Planos de Entregas",
+      description="Dados de Planos de Entregas",
+      link=url_for("entregas.lista_pe")
+    %}
+      {% include "card_menu.html" %}
+    {% endwith %}
+
+    {% with 
+      icon="fa-screwdriver-wrench", 
+      title="Planos de Trabalho",
+      description="Lista dos Planos de Trabalho",
+      link=url_for("trabalhos.lista_pts", lista = "Todos")
+    %}
+      {% include "card_menu.html" %}
+    {% endwith %}
+
+    {% with 
+      icon="fa-people-line", 
+      title="Pessoas",
+      description="Lista de pessoas",
+      link=url_for('pessoas.lista_pessoas')
+    %}
+      {% include "card_menu.html" %}
+    {% endwith %} 
+
+    {% with 
+      icon="fa-boxes-stacked", 
+      title="Unidades",
+      description="Lista de unidades",
+      link=url_for('unidades.lista_unidades')
+    %}
+      {% include "card_menu.html" %}
+    {% endwith %}
+    
+  </div>
+</div>
+
+{% else %}
+
+<div class="main-content pl-sm-3 mt-4" id="main-content">
+  <h1>Bem vindo!</h1>
+  <h4 class="fs-5 fw-light">No canto superior direito, entre, ou registre-se, para acessar o sistema.</h4>
+</div>
+
+</div>
+
+{% endif %}
+
+{% endblock %}
