@@ -5,7 +5,6 @@
   <div class="br-breadcrumb">
     <ul class="crumb-list">
       <li class="crumb home"><a class="br-button circle" href="{{url_for('core.inicio')}}"><span class="sr-only">Página inicial</span><i class="fa fa-home"></i></a></li>
-      <li class="crumb"><i class="icon fa fa-chevron-right"></i><a href="{{url_for('trabalhos.trabalho_i')}}">Planos de Trabalho</a></li>
       <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Lista de Planos de Trabalho 
         {% if lista == 'Enviado para aceite' %}
           enviado(s) para aceite
