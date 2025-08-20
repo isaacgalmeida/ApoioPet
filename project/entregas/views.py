@@ -7,7 +7,7 @@
 
 # views.py dentro da pasta entregas
 
-from flask import render_template, url_for, flash, redirect, Blueprint
+from flask import render_template, url_for, flash, redirect, Blueprint, send_from_directory
 from flask_login import current_user, login_required
 from sqlalchemy import func, case, literal_column, or_, distinct
 from sqlalchemy.sql import label
@@ -15,16 +15,20 @@ from sqlalchemy.orm import aliased
 from project import db, app
 from project.models import Unidades, Pessoas, programas, planos_entregas, unidades_integrantes,\
                            avaliacoes, planos_entregas_entregas, planos_trabalhos_entregas, tipos_modalidades, planos_trabalhos_consolidacoes,\
-                           planos_trabalhos, PlanoTrabalhoTrabalhos
+                           planos_trabalhos
+
+from project.entregas.forms import CSV_Form
 
 from datetime import datetime as dt
+
+import os, csv
 
 entregas = Blueprint("entregas",__name__,template_folder='templates')    
 
 
 ## lista planos de entregas
 
-@entregas.route('/lista_pe')
+@entregas.route('/lista_pe',methods=['GET','POST'])
 @login_required
 def lista_pe():
     """
@@ -85,11 +89,31 @@ def lista_pe():
                                
 
     quantidade = len(planos_entregas_todos)
-            
+
+    form = CSV_Form()
+
+    if form.validate_on_submit():
+
+        csv_caminho_arquivo = os.path.normpath('/app/project/static/planos_entrega.csv')
+        
+        dados_a_escrever = [[p.sigla, p.status, p.data_inicio, p.data_fim, p.qtd_entregas, p.qtd_planos_trab, p.nota] for p in planos_entregas_todos]
+
+        header = ['Unidade', 'Status','Início','Fim', 'Qtd. Entregas', 'Qtd. PTs', 'Nota']
+
+        with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(header) 
+            csv_writer.writerows(dados_a_escrever)
+
+        # o comandinho mágico que permite fazer o download de um arquivo
+        send_from_directory('/app/project/static', 'planos_entrega.csv')
+
+        return redirect(url_for('static', filename = 'planos_entrega.csv'))        
 
     return render_template('lista_pe.html', unid_dados = unid_dados,
                                             planos_entregas_todos = planos_entregas_todos,
-                                            quantidade = quantidade)
+                                            quantidade = quantidade,
+                                            form = form)
 
 
 ## consulta entregas de um plano de entregas

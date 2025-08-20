@@ -21,6 +21,11 @@ class PesquisaForm(FlaskForm):
    perf    = SelectField('Perfil:')
    
    submit  = SubmitField('Pesquisar')
+
+# form com botão para gerar csv
+class CSV_Form(FlaskForm):
+
+    submit2 = SubmitField('Gerar CSV')   
    
 
         

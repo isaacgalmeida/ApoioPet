@@ -1,0 +1,49 @@
+{% extends "template_gov.html" %}
+{% block content %}
+
+
+  <div class="col mb-5">
+    <div class="br-breadcrumb">
+      <ul class="crumb-list">
+        <li class="crumb home"><a class="br-button circle" href="{{url_for('core.inicio')}}"><span class="sr-only">Página inicial</span><i class="fa fa-home"></i></a></li>
+        <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Escolher Tipo</span></li>
+      </ul>
+    </div>
+  </div>
+
+
+    <div class="row mt-5">
+      <div class="d-flex justify-content-center  flex-wrap">
+    
+
+        {% with 
+          icon="fa-list", 
+          title="Planos de Entrega",
+          description="Lista os envios mal sucedidos de Planos de Entregas",
+          link=url_for('envios.envios_insucesso_pe')
+        %}
+          {% include "card_menu.html" %}
+        {% endwith %}
+
+        {% with 
+          icon="fa-list-check", 
+          title="Planos de Trabalho",
+          description="Lista os envios mal sucedidos de Planos de Trabalho",
+          link=url_for('envios.envios_insucesso_pt')
+        %}
+          {% include "card_menu.html" %}
+        {% endwith %}
+
+        {% with 
+          icon="fa-user-times", 
+          title="Participantes",
+          description="Lista os envios mal sucedidos de Participantes",
+          link=url_for('envios.envios_insucesso_par')
+        %}
+          {% include "card_menu.html" %}
+        {% endwith %}
+
+      </div>
+    </div>
+
+{% endblock %}

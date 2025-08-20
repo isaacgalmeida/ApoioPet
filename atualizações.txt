@@ -1,5 +1,11 @@
 ## Atualizações ##
 
+20/08/2025
+
+Inclusão de relatórios de erros de envio.
+Geração de CSV nas listas.
+v1.0.4
+
 22/07/2025
 
 Correções em função da alteração da estrutura do banco (tabela usuarios).

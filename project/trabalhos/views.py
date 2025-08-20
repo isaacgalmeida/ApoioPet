@@ -11,7 +11,7 @@
 
 # views.py dentro da pasta trabalhos
 
-from flask import render_template, Blueprint
+from flask import render_template, Blueprint, send_from_directory, redirect, url_for
 from flask_login import current_user, login_required
 from sqlalchemy import func, case, literal_column
 from sqlalchemy.sql import label
@@ -20,6 +20,9 @@ from project import db, app
 from project.models import Unidades, Pessoas, planos_trabalhos, planos_trabalhos_consolidacoes, planos_trabalhos_entregas, atividades,\
                            avaliacoes, tipos_modalidades, planos_entregas_entregas
 
+from project.trabalhos.forms import CSV_Form
+
+import os, csv
 
 from datetime import datetime as dt
 
@@ -41,26 +44,8 @@ def get_random_string(length):
     return ''.join(random.choice(letters) for i in range(length))
 
 
-## renderiza tela de planos de trabalho
-
-@trabalhos.route('/trabalho_i')
-@login_required
-
-def trabalho_i():
-    """
-    +---------------------------------------------------------------------------------------+
-    |Apresenta tela inicial de planos de trabalho.                                          |
-    |                                                                                       |
-    +---------------------------------------------------------------------------------------+
-    """
-    
-    return render_template('trabalho.html') 
-
-
-
-
 # lista dos planos de trabalho da unidade
-@trabalhos.route('<lista>/lista_pts')
+@trabalhos.route('<lista>/lista_pts',methods=['GET','POST'])
 @login_required
 def lista_pts(lista):
 
@@ -120,10 +105,30 @@ def lista_pts(lista):
 
     quantidade = len(planos_trabalho_lista)                         
  
+    form = CSV_Form()
+
+    if form.validate_on_submit():
+
+        csv_caminho_arquivo = os.path.normpath('/app/project/static/planos_trabalho.csv')
+        
+        dados_a_escrever = [[p.nome, p.sigla, p.data_inicio, p.data_fim, p.forma, p.situacao, str(p.carga_horaria) +'('+p.forma_contagem_carga_horaria+')', p.qtd_trabalhos, p.qtd_aval] for p in planos_trabalho_lista]
+
+        header = ['Pessoa', 'Unidade','Início','Fim', 'Forma', 'Situação', 'C.H.', 'Trabalhos', 'Avaliações']
+
+        with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(header) 
+            csv_writer.writerows(dados_a_escrever)
+
+        # o comandinho mágico que permite fazer o download de um arquivo
+        send_from_directory('/app/project/static', 'planos_trabalho.csv')
+
+        return redirect(url_for('static', filename = 'planos_trabalho.csv'))    
     
     return render_template ('lista_pts.html', planos_trabalho_lista = planos_trabalho_lista, 
                                               quantidade = quantidade,
-                                              lista = lista)
+                                              lista = lista,
+                                              form = form)
 
 
 

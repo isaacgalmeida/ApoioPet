@@ -47,6 +47,7 @@ from project.entregas.views import entregas
 from project.trabalhos.views import trabalhos
 from project.pessoas.views import pessoas
 from project.unidades.views import unidades
+from project.envios.views import envios
 
 app.register_blueprint(core)
 app.register_blueprint(usuarios)
@@ -57,5 +58,7 @@ app.register_blueprint(entregas,url_prefix='/entregas')
 app.register_blueprint(trabalhos,url_prefix='/trabalhos')
 app.register_blueprint(pessoas,url_prefix='/pessoas')
 app.register_blueprint(unidades,url_prefix='/unidades')
+app.register_blueprint(envios,url_prefix='/envios')
+
 
 

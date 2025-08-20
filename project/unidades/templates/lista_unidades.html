@@ -29,6 +29,29 @@
           <h4  class="header-list">Lista das Unidades</h4>
       {% endif %}  
 
+      {% if lista == 'pesq' %}  
+
+        <div class="d-flex justify-content-around">        
+          <a href="{{url_for('unidades.csv_lista_unidades_filtro', filtro=filtro)}}" class="br-button secondary mr-3" role="button">
+                          <i class="fa-solid fa-file"></i>&nbsp; Gerar CSV</a>
+        </div>
+
+      {% else %}
+      
+        <form class="needs-validation" method='POST' >
+
+          {{ form.hidden_tag() }}
+
+          <div class="row justify-content-around">
+
+            {{ form.submit(class="br-button secondary mr-3") }}
+
+          </div>
+
+        </form>
+
+      {% endif %}  
+
       <div class="d-flex justify-content-around">        
         <a href="{{url_for('unidades.lista_unidades_filtro',lista='pesq')}}" class="br-button secondary mr-3" role="button"><i class="fa fa-filter" aria-hidden="true"></i>Filtro</a>
       </div>

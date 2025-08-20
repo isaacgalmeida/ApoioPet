@@ -12,22 +12,23 @@
 
 # views.py na pasta unidades
 
-from flask import render_template,request,Blueprint
+from flask import render_template, request, Blueprint, send_from_directory, redirect, url_for
 from flask_login import current_user, login_required
+
+import os, csv
 
 from sqlalchemy import func, distinct
 from sqlalchemy.sql import label
 from project import db
 from project.models import Unidades, Pessoas, unidades_integrantes, unidades_integrantes_atribuicoes, cidades
-from project.unidades.forms import PesquisaUnidForm
-
+from project.unidades.forms import PesquisaUnidForm, CSV_Form
 
 unidades = Blueprint('unidades',__name__, template_folder='templates')
 
 
 ## lista unidades da instituição
 
-@unidades.route('/lista_unidades')
+@unidades.route('/lista_unidades',methods=['GET','POST'])
 
 def lista_unidades():
     """
@@ -150,13 +151,55 @@ def lista_unidades():
             caminho_dict[c.id] = c.sigla              
  
 
+    form = CSV_Form()
+
+    if form.validate_on_submit():
+
+        unids_csv = db.session.query(Unidades.id,
+                                     Unidades.sigla,
+                                     Unidades.nome,
+                                     Unidades.unidade_pai_id,
+                                     cidades.uf,
+                                     Unidades.path,
+                                     Unidades.codigo,
+                                     label('titular',chefes_s.c.nome),
+                                     label('substituto',func.count(distinct(substitutos_s.c.nome))),
+                                     label('delegado',func.count(distinct(delegados_s.c.nome))))\
+                        .outerjoin(cidades, cidades.id == Unidades.cidade_id)\
+                        .outerjoin(chefes_s, chefes_s.c.unidade_id == Unidades.id)\
+                        .outerjoin(substitutos_s, substitutos_s.c.unidade_id == Unidades.id)\
+                        .outerjoin(delegados_s, delegados_s.c.unidade_id == Unidades.id)\
+                        .filter(Unidades.deleted_at == None)\
+                        .order_by(Unidades.sigla)\
+                        .group_by(Unidades.id,chefes_s.c.nome)\
+                        .all()
+
+
+        csv_caminho_arquivo = os.path.normpath('/app/project/static/unidades.csv')
+        
+        dados_a_escrever = [[caminho_dict[u.id], u.nome, u.sigla, u.codigo, u.titular, u.substituto, u.delegado] for u in unids_csv]
+
+        header = ['Hierarquia', 'Nome','Sigla','UF', 'Código', 'Gestor', 'Substituto', 'Delegado']
+
+        with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(header) 
+            csv_writer.writerows(dados_a_escrever)
+
+        # o comandinho mágico que permite fazer o download de um arquivo
+        send_from_directory('/app/project/static', 'unidades.csv')
+
+        return redirect(url_for('static', filename = 'unidades.csv'))
+
+    
     return render_template('lista_unidades.html', unids = unids, quantidade = quantidade, chefes = chefes,
                                                   substitutos = substitutos, delegados = delegados,
-                                                  caminho_dict = caminho_dict, lista = lista, qtd_unids=qtd_unids)
+                                                  caminho_dict = caminho_dict, lista = lista, qtd_unids=qtd_unids,
+                                                  form = form)
 
     
 
-## lista unidades da instituição
+## lista unidades da instituição mediante filtro
 
 @unidades.route('<lista>/lista_unidades_filtro', methods=['GET','POST'])
 
@@ -170,8 +213,6 @@ def lista_unidades_filtro(lista):
 
     page = request.args.get('page', 1, type=int)
 
-    
-    
     form = PesquisaUnidForm()
     
     unids = db.session.query(Unidades.sigla)\
@@ -308,6 +349,8 @@ def lista_unidades_filtro(lista):
             else:
                 caminho_dict[c.id] = c.sigla
 
+        filtro = [p_sigla_pattern, p_pai_pattern, form.nome.data, form.uf.data]
+
         return render_template('lista_unidades.html', unids = unids, quantidade = quantidade,
                                                       lista = lista,
                                                       p_sigla = p_sigla,
@@ -316,8 +359,108 @@ def lista_unidades_filtro(lista):
                                                       p_uf = form.uf.data,
                                                       chefes = chefes,
                                                       substitutos = substitutos, delegados = delegados,
-                                                      caminho_dict = caminho_dict,)
+                                                      caminho_dict = caminho_dict,
+                                                      form = form,
+                                                      filtro = filtro)
 
     return render_template('pesquisa_unidades.html', form = form)
 
+## gera csv com unidades da instituição mediante filtro
+
+@unidades.route('/<filtro>/csv_lista_unidades_filtro', methods=['GET','POST'])
+
+def csv_lista_unidades_filtro(filtro):
+    """
+    +---------------------------------------------------------------------------------------+
+    |Gera csv com lista das unidades da instituição de acordo com filtro aplicado.          |
+    |                                                                                       |
+    +---------------------------------------------------------------------------------------+
+    """ 
+
+    filtro = filtro.split(',')
+    
+    chefes_s = db.session.query(Pessoas.id,
+                                Pessoas.nome,
+                                unidades_integrantes.unidade_id,
+                                unidades_integrantes_atribuicoes.atribuicao)\
+                    .join(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                    .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                    .filter(unidades_integrantes_atribuicoes.deleted_at == None,
+                            unidades_integrantes_atribuicoes.atribuicao == 'GESTOR')\
+                    .subquery()
+    substitutos_s = db.session.query(Pessoas.id,
+                                Pessoas.nome,
+                                unidades_integrantes.unidade_id,
+                                unidades_integrantes_atribuicoes.atribuicao)\
+                            .join(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                            .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                            .filter(unidades_integrantes_atribuicoes.deleted_at == None,
+                                    unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_SUBSTITUTO')\
+                            .subquery()
+    delegados_s = db.session.query(Pessoas.id,
+                                Pessoas.nome,
+                                unidades_integrantes.unidade_id,
+                                unidades_integrantes_atribuicoes.atribuicao)\
+                            .join(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                            .join(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                            .filter(unidades_integrantes_atribuicoes.deleted_at == None,
+                                    unidades_integrantes_atribuicoes.atribuicao == 'GESTOR_DELEGADO')\
+                            .subquery()
+
+    unids_csv = db.session.query(Unidades.id,
+                                Unidades.sigla,
+                                Unidades.nome,
+                                Unidades.unidade_pai_id,
+                                cidades.uf,
+                                Unidades.path,
+                                Unidades.codigo,
+                                label('titular',chefes_s.c.nome),
+                                label('substituto',func.count(distinct(substitutos_s.c.nome))),\
+                                label('delegado',func.count(distinct(delegados_s.c.nome))))\
+                        .outerjoin(cidades, cidades.id == Unidades.cidade_id)\
+                        .outerjoin(chefes_s, chefes_s.c.unidade_id == Unidades.id)\
+                        .outerjoin(substitutos_s, substitutos_s.c.unidade_id == Unidades.id)\
+                        .outerjoin(delegados_s, delegados_s.c.unidade_id == Unidades.id)\
+                        .filter(Unidades.sigla.like(filtro[0][1:].split("'")[1]),
+                                Unidades.unidade_pai_id.like(filtro[1].split("'")[1]),
+                                Unidades.nome.like('%'+filtro[2].split("'")[1]+'%'),
+                                cidades.uf.like('%'+filtro[3][:-1].split("'")[1]+'%'))\
+                        .order_by(Unidades.sigla)\
+                        .group_by(Unidades.id,chefes_s.c.nome)\
+                        .all()
+    
+    caminho = db.session.query(Unidades.path,Unidades.sigla,Unidades.id).all()
+    caminho_dict = {}
+    for c in caminho:
+        if c.path != None and c.path != '':
+            p = c.path.split('/')
+            arvore = ''
+            for i in p:
+                if len(i) > 0:
+                    sigla_arvore = db.session.query(Unidades.sigla).filter(Unidades.id == i).first()
+                    if sigla_arvore != None:
+                            arvore += sigla_arvore.sigla+'/'
+            arvore += c.sigla
+            caminho_dict[c.id] = arvore 
+        else:
+            caminho_dict[c.id] = c.sigla
+
+
+    csv_caminho_arquivo = os.path.normpath('/app/project/static/unidades_filtro.csv')
+        
+    dados_a_escrever = [[caminho_dict[u.id], u.nome, u.sigla, u.codigo, u.titular, u.substituto, u.delegado] for u in unids_csv]
+
+    header = ['Hierarquia', 'Nome','Sigla','UF', 'Código', 'Gestor', 'Substituto', 'Delegado']
+
+    with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow(header) 
+        csv_writer.writerows(dados_a_escrever)
+
+    # o comandinho mágico que permite fazer o download de um arquivo
+    send_from_directory('/app/project/static', 'unidades_filtro.csv')
+
+    return redirect(url_for('static', filename = 'unidades_filtro.csv'))
+
 #
+

@@ -12,7 +12,9 @@
 
 # views.py na pasta pessoas
 
-from flask import render_template, Blueprint, request
+import os, csv
+
+from flask import render_template, Blueprint, request, redirect, send_from_directory, url_for
 from flask_login import current_user, login_required
 
 from sqlalchemy.sql import label
@@ -23,7 +25,7 @@ from project.models import Unidades, unidades_integrantes, Pessoas, perfis, unid
                            planos_trabalhos_entregas, planos_entregas_entregas, tipos_modalidades, planos_trabalhos_consolidacoes,\
                            avaliacoes
                             
-from project.pessoas.forms import PesquisaForm
+from project.pessoas.forms import PesquisaForm, CSV_Form
 
 
 pessoas = Blueprint('pessoas',__name__, template_folder='templates')
@@ -31,7 +33,7 @@ pessoas = Blueprint('pessoas',__name__, template_folder='templates')
 
  ## lista pessoas da instituição
 
-@pessoas.route('/lista_pessoas')
+@pessoas.route('/lista_pessoas',methods=['GET','POST'])
 @login_required
 
 def lista_pessoas():
@@ -80,11 +82,54 @@ def lista_pessoas():
 
     quantidade = pessoas_lista.total
 
+    form = CSV_Form()
+
+    if form.validate_on_submit():
+        
+        csv_caminho_arquivo = os.path.normpath('/app/project/static/pessoas.csv')
+
+        pessoas_csv = db.session.query(Pessoas.id,
+                                     Pessoas.nome,
+                                     Pessoas.cpf,
+                                     Pessoas.data_nascimento,
+                                     Pessoas.matricula,
+                                     Pessoas.email,
+                                     Unidades.sigla,
+                                     unidades_integrantes_atribuicoes.atribuicao,
+                                     Pessoas.situacao_funcional,
+                                     label('perfil',perfis.nome),
+                                     label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))))\
+                                .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                                .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                                .outerjoin(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
+                                .join(perfis, perfis.id == Pessoas.perfil_id)\
+                                .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
+                                .filter(Pessoas.deleted_at == None)\
+                                .order_by(Pessoas.nome)\
+                                .group_by(Pessoas.id,Unidades.sigla,unidades_integrantes_atribuicoes.atribuicao)\
+                                .all()
+
+
+        dados_a_escrever = [[p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, p.atribuicao, p.situacao_funcional, p.perfil, p.qtd_planos_trab] for p in pessoas_csv]
+
+        header = ['Nome', 'Data Nasc.','Matrícula','E-mail', 'Unidade', 'Atribuição', 'Situação', 'Perfil', 'PTs']
+
+        with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(header) 
+            csv_writer.writerows(dados_a_escrever)
+
+        # o comandinho mágico que permite fazer o download de um arquivo
+        send_from_directory('/app/project/static', 'pessoas.csv')
+
+        return redirect(url_for('static', filename = 'pessoas.csv'))
+
 
     return render_template('lista_pessoas_gestor.html', pessoas = pessoas_lista,
                                                         quantidade = quantidade,
                                                         qtd_pessoas = qtd_pessoas,
-                                                        tipo = tipo)
+                                                        tipo = tipo,
+                                                        form = form)
     
     
 ## lista pessoas da instituição conforme filtro aplicado
@@ -100,13 +145,9 @@ def lista_pessoas_filtro():
     +---------------------------------------------------------------------------------------+
     """
 
-    page = request.args.get('page', 1, type=int)
-    
-    pag = 100
-
     tipo = "pesq"
 
-    form = PesquisaForm()     
+    form = PesquisaForm() 
     
     unids = db.session.query(Unidades.id,Unidades.sigla)\
                       .filter(Unidades.deleted_at == None)\
@@ -133,8 +174,10 @@ def lista_pessoas_filtro():
     form.atrib.choices   = lista_atrib
     form.unidade.choices = lista_unids
 
-    if form.validate_on_submit():
+    if form.submit.data and form.validate_on_submit():
 
+        nome_pesq = form.nome.data
+        
         if form.situ.data == '':
             p_situ_pattern = '%'
         else:
@@ -179,25 +222,88 @@ def lista_pessoas_filtro():
                                   .join(perfis, perfis.id == Pessoas.perfil_id)\
                                   .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
                                   .filter(Pessoas.deleted_at == None,
-                                          Pessoas.nome.like('%'+form.nome.data+'%'),
+                                          Pessoas.nome.like('%'+nome_pesq+'%'),
                                           Unidades.id.like(p_unid_pattern),
                                           Pessoas.situacao_funcional.like(p_situ_pattern),
                                           perfis.id.like(p_perf_pattern),
                                           unidades_integrantes_atribuicoes.atribuicao.like(p_atrib_pattern))\
                                   .order_by(Pessoas.nome)\
                                   .group_by(Pessoas.id,Unidades.sigla,unidades_integrantes_atribuicoes.atribuicao)\
-                                  .paginate(page=page,per_page=pag)
+                                  .all()
     
-        quantidade = pessoas_lista.total
+        quantidade = len(pessoas_lista)
+
+        filtro = [nome_pesq, p_unid_pattern, p_situ_pattern, p_perf_pattern, p_atrib_pattern]
+
+        return render_template('lista_pessoas_filtro.html', pessoas = pessoas_lista, quantidade=quantidade,
+                                                        tipo = tipo,
+                                                        p_atrib = p_atrib, p_perf = p_perf,
+                                                        p_situ = p_situ, p_unid = p_unid, p_nome = nome_pesq,
+                                                        filtro = filtro)
 
 
-        return render_template('lista_pessoas_gestor.html', pessoas = pessoas_lista, quantidade=quantidade,
-                                                            tipo = tipo,
-                                                            p_atrib = p_atrib, p_perf = p_perf,
-                                                            p_situ = p_situ, p_unid = p_unid, p_nome = form.nome.data)
+    return render_template('pesquisa_pessoas.html', form = form)
+    
 
-    return render_template('pesquisa_pessoas.html', form = form)                                                
+## cria csv do resultado de um filtro
+## feito separado por conta da dificuldade de ter as duas ações (gerar lista e criar csv) em uma só view
 
+@pessoas.route('/<filtro>/csv_pessoas_filtro')
+@login_required
+
+def csv_pessoas_filtro(filtro):
+    """
+    +---------------------------------------------------------------------------------------+
+    |Cria o csv do resultado de um filtro aplicado na lista de pessoas.                     |
+    |                                                                                       |
+    +---------------------------------------------------------------------------------------+
+    """
+
+    filtro = filtro.split(',')
+
+    pessoas_csv_filtro = db.session.query(Pessoas.id,
+                                         Pessoas.nome,
+                                         Pessoas.cpf,
+                                         Pessoas.data_nascimento,
+                                         Pessoas.matricula,
+                                         Pessoas.email,
+                                         Unidades.sigla,
+                                         unidades_integrantes_atribuicoes.atribuicao,
+                                         Pessoas.situacao_funcional,
+                                         label('perfil',perfis.nome),
+                                         label('perfil_id',perfis.id),
+                                         label('qtd_planos_trab',func.count(distinct(planos_trabalhos.id))))\
+                                  .outerjoin(unidades_integrantes, unidades_integrantes.usuario_id == Pessoas.id)\
+                                  .outerjoin(unidades_integrantes_atribuicoes, unidades_integrantes_atribuicoes.unidade_integrante_id == unidades_integrantes.id)\
+                                  .outerjoin(Unidades, Unidades.id == unidades_integrantes.unidade_id)\
+                                  .join(perfis, perfis.id == Pessoas.perfil_id)\
+                                  .outerjoin(planos_trabalhos, planos_trabalhos.usuario_id == Pessoas.id)\
+                                  .filter(Pessoas.deleted_at == None,
+                                          Pessoas.nome.like('%'+filtro[0][1:].split("'")[1]+'%'),
+                                          Unidades.id.like(filtro[1].split("'")[1]),
+                                          Pessoas.situacao_funcional.like(filtro[2].split("'")[1]),
+                                          perfis.id.like(filtro[3].split("'")[1]),
+                                          unidades_integrantes_atribuicoes.atribuicao.like(filtro[4][:-1].split("'")[1]))\
+                                  .order_by(Pessoas.nome)\
+                                  .group_by(Pessoas.id,Unidades.sigla,unidades_integrantes_atribuicoes.atribuicao)\
+                                  .all()
+
+    csv_caminho_arquivo = os.path.normpath('/app/project/static/pessoas_filtro.csv')
+
+    dados_a_escrever = [[p.nome, p.data_nascimento, p.matricula, p.email, p.sigla, p.atribuicao, p.situacao_funcional, p.perfil, p.qtd_planos_trab] for p in pessoas_csv_filtro]
+
+    header = ['Nome', 'Data Nasc.','Matrícula','E-mail', 'Unidade', 'Atribuição', 'Situação', 'Perfil', 'PTs']
+
+    with open(csv_caminho_arquivo, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow(header) 
+        csv_writer.writerows(dados_a_escrever)
+
+    # o comandinho mágico que permite fazer o download de um arquivo
+    send_from_directory('/app/project/static', 'pessoas_filtro.csv')
+
+    return redirect(url_for('static', filename = 'pessoas_filtro.csv'))
+                                                 
      
 ## lista planos de trabalho vinculados a uma pessoa
 

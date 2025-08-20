@@ -7,6 +7,17 @@
 /project/pessoas/__pycache__
 /project/planejamento/__pycache__
 /project/static/__pycache__
+/project/static/par.csv
+/project/static/pe.csv
+/project/static/pes.csv
+/project/static/pessoas_filtro.csv
+/project/static/pessoas.csv
+/project/static/pt.csv
+/project/static/pts.csv
+/project/static/unidades_filtro.csv
+/project/static/unidades.csv
+/project/static/planos_entrega.csv
+/project/static/planos_trabalho.csv
 /project/templates/__pycache__
 /project/trabalhos/__pycache__
 /project/unidades/__pycache__

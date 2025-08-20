@@ -5,12 +5,8 @@
   <div class="br-breadcrumb">
     <ul class="crumb-list">
       <li class="crumb home"><a class="br-button circle" href="{{url_for('core.inicio')}}"><span class="sr-only">Página inicial</span><i class="fa fa-home"></i></a></li>
-      {% if tipo == "pesq" %}
-        <li class="crumb"><i class="icon fa fa-chevron-right"></i><a href="{{url_for('pessoas.lista_pessoas')}}">Pessoas</a></li>
-        <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Pessoas (Filtro)</span></li>
-      {% else %}    
-        <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Pessoas</span></li>
-      {% endif %}
+      <li class="crumb"><i class="icon fa fa-chevron-right"></i><a href="{{url_for('pessoas.lista_pessoas')}}">Pessoas</a></li>
+      <li class="crumb" data-active="active"><i class="icon fa fa-chevron-right"></i><span>Pessoas (Filtro)</span></li>
     </ul>
   </div>
 </div>
@@ -20,39 +16,18 @@
     <div class="card-header">
       <div class="d-flex flex-column flex-md-row justify-content-between">
         <h4 class="header-list">Lista das Pessoas 
-          {% if tipo == "inst" %}na Instituição
-          {% elif tipo == "pesq" %} 
             <br><small>Filtro aplicado: Nome <b>"{{p_nome}}"</b>, Unidade <b>"{{p_unid}}"</b>, Atrib. <b>"{{p_atrib}}"</b>, Sit. <b>"{{p_situ}}"</b>, Perf. <b>"{{p_perf}}"</b>
-          {% else %}na Unidade
-          {% endif %}</h4>
+        </h4>
 
-        <form class="needs-validation" method='POST' >
+        <a href="{{url_for('pessoas.csv_pessoas_filtro', filtro=filtro)}}" class="br-button secondary mr-3" role="button">
+                          <i class="fa-solid fa-file"></i>&nbsp; Gerar CSV</a>
 
-        {{ form.hidden_tag() }}
-
-        <div class="row justify-content-around">
-
-          {{ form.submit2(class="br-button secondary mr-3") }}
-
-        </div>
-
-        </form>  
-
-        <div class="d-flex justify-content-around">
-
-            <a href="{{url_for('pessoas.lista_pessoas_filtro')}}" class="br-button secondary mr-3" role="button"><i class="fa fa-filter" aria-hidden="true"></i>Filtro</a>
-
-        </div>
       </div>
       
     </div>
     <div class="card-body">
-       
-        {% if tipo == "inst" %}
-          <p><span class="badge text-bg-primary">{{qtd_pessoas}}</span> pessoas na Instituição (<span class="badge text-bg-warning">{{quantidade}}</span> registros na lista)
-        {% elif tipo == "pesq" %}
-          <span class="badge text-bg-warning">{{quantidade}}</span> registros na lista, conforme filtro aplicado  
-        {% endif %}
+
+      <span class="badge text-bg-warning">{{quantidade}}</span> registros na lista, conforme filtro aplicado  
         
       </p>
       <table style="width: 100%" id="table"
@@ -93,10 +68,10 @@
           </tr>
         </thead>
         <tbody>
-          {% for p in pessoas.items %}
+          {% for p in pessoas %}
 
           <tr>
-            <th scope="row"> <p align = "center">{{(pessoas.page - 1) * pessoas.per_page + pessoas.items.index(p) + 1}} </a> </p></th>
+            <th scope="row"> <p align = "center">{{ pessoas.index(p) + 1 }} </p></th>
             <td><p align = "center"> {{p.nome}} </p></td>
             <td><p align = "center"> {% if p.data_nascimento == None or p.data_nascimento == '' %}N.I.{% else %}{{p.data_nascimento.strftime('%d/%m/%Y')}}{%endif%} </p></td>
             <td><p align = "center"> {{p.matricula}} </p></td>
@@ -133,27 +108,7 @@
 
         </tbody>
       </table>
-      <nav class="br-pagination"  aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-      
-          {% for page_num in pessoas.iter_pages(left_edge=1,left_current=1,right_current=2,right_edge=1) %}
-            {% if page_num %}
-              {% if pessoas.page == page_num %}
-                <li>
-                    <a class="page active" href="{{url_for('pessoas.lista_pessoas',page=page_num)}}">{{page_num}}</a>
-                </li>
-              {% else %}
-                <li>
-                    <a class="page" href="{{url_for('pessoas.lista_pessoas',page=page_num)}}">{{page_num}}</a>
-                </li>
-              {% endif %}
-            {% else %}
-              <span class="page">…</span>
-            {% endif %}
-      
-          {% endfor %}
-        </ul>
-      </nav>
+
     </div>
   </div>
   

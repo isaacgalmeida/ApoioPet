@@ -21,8 +21,24 @@
 </div>
 
 <div class="container">
-  
-  <h4>Lista de Planos de Trabalho</h4>
+  <div class="row">
+    <div class="col-9">
+      <h4>Lista de Planos de Trabalho</h4>
+    </div>
+    <div class="col-2">
+      <form class="needs-validation" method='POST' >
+
+        {{ form.hidden_tag() }}
+
+        <div class="row justify-content-around">
+
+          {{ form.submit(class="br-button secondary mr-3") }}
+
+        </div>
+
+      </form>
+    </div>
+  </div>
 
 <caption>
   <div class="row">
