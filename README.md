@@ -2,6 +2,10 @@
 
 A imagem docker está disponível em https://hub.docker.com/r/cimei/apoiopet
 
+**Mapa Estratégico**
+
+- Nome, missão, visão, resultados, objetivos por eixo temático e valores
+
 **Planos de entregas** 
 
   - Listagem de todos os PEs cadastrados contendo:
@@ -25,37 +29,44 @@ A imagem docker está disponível em https://hub.docker.com/r/cimei/apoiopet
 **Plano de trabalho**   
 
  - Listagem de todos os PTs cadastrados contendo:
-    * Quantidade total de PTs cadastrados (geral, por unidade e por participante);
+    * Quantidade total de PTs cadastrados (geral);
     * unidade;
     * nome do participante;
-    * status;
+    * situação;
     * inicio e fim;
-    * modalidade do plano de trabalho;
-    * quantidade do %CHD total (para verificar se somam 100%);
-    * quantas e quais entregas estão vinculadas, e suas respectivas %CHD;
+    * modalidade do plano de trabalho (forma);
+    * quantidade do %CHD total;
     * se foi avaliado e qual a avaliação;
-    * registros de execução:
-    * status;
-    * se foram incluídas as atividades realizadas para cada entrega vinculada aos PTs;
-    * afastamentos;
+    * detalhamento dos trabalhos;
 
-**Servidores**
+**Pessoas**
 
-* Nome;        
+* Nome;  
+* Data nascimento;
+* Matrícula;
+* E-mail;      
 * Perfil (Participante, Unidade, etc.);
+* Situação;
 * Unidade de lotação;
-* Unidades que tem algum vínculo e qual o tipo de atribuição (chefia, chefia substituta, servidor delegado, servidor vinculado);
 * Quantos e quais planos de trabalho foram cadastrados;
-* Quantos e quais planos de entregas foram cadastrados (quando houver atribuição de chefia);
 
 **Unidades**
 
  * Sigla;
  * Nome;
  * Código;
+ * UF;
  * Unidade Pai;
- * Servidores que tem algum vínculo e qual vínculo (lotado, chefe, etc.)
- * Quantidade de PEs e PTs vinculados;
+ * Titular
+ * Substituto
+ * Delegado
+
+**Envios mal sucedidos**
+
+ * Planos de entregas
+ * Planos de trabalho
+ * Participantes
+
 
  
 ...
