@@ -2,21 +2,11 @@
 .. topic:: users (views)
 
     Objetos relativos a usuários
-
-.. topic:: Funções 
-
-    * registra_log_unid: Registro dos principais commits do usu do sistema
-    * registra_log_gestao: Registro dos principais commits de atividades de gestão
         
 .. topic:: Ações relacionadas aos usuários:        
 
     * login: Login do usuário
     * logout: Logout do usuário
-    * log: Mostra o log da gestão do sistema
-    * view_users: Mostra pessoas que tem perfil de gestão
-    * register: Registra uma pessoa como gestora
-    * deleta_user: Retira uma pessoa do grupo de gestores
-    * Remove um agendamento: agenda_remove
 
 """
 # views.py na pasta users
@@ -38,45 +28,7 @@ from project.usuarios.forms import LoginForm, LogForm, RegistrationForm, UserFor
 
 usuarios = Blueprint('usuarios',__name__)
 
-# função para registrar comits no log
-def registra_log_unid(user_id,msg):
-    """
-    +---------------------------------------------------------------------------------------+
-    |Função que registra ação do usuário na tabela log_unid.                                |
-    |INPUT: user_id e msg                                                                   |
-    +---------------------------------------------------------------------------------------+
-    """
 
-    reg_log = Log_Unid(data_hora  = dt.now(),
-                       user_id    = user_id,
-                       msg        = msg)
-
-    db.session.add(reg_log)
-
-    db.session.commit()
-
-    return
-
-# função para registrar comits no log
-def registra_log_gestao(user_id,msg):
-    """
-    +---------------------------------------------------------------------------------------+
-    |Função que registra ação do usuário na tabela log_auto.                                |
-    |INPUT: user_id e msg                                                                   |
-    +---------------------------------------------------------------------------------------+
-    """
-
-    reg_log = Log_Gestao(data_hora  = dt.now(),
-                       user_id    = user_id,
-                       msg        = msg)
-
-    db.session.add(reg_log)
-
- 
-    db.session.commit()
-  
-
-    return
 
 # login
 @usuarios.route('/login', methods=['GET','POST'])
