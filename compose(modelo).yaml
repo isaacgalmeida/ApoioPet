@@ -20,7 +20,7 @@ services:
       LDAP_URL: "<servidor:porta do ldap da instituição>" 
       STR_CONEXAO: "<ou e dc utilizados>" 
       STR_SEARCH: "<dc utilizado>" 
-      STR_ATRIBUTO: "<atributo de validação>"
+      STR_ATRIBUTO: "mail"
       USER_LIST: "<lista de usuários (apelidos) para acesso direto>"
       USER_LIST_PASS: "<senha para acesso direto>"
 
