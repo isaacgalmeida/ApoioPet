@@ -70,26 +70,26 @@ ORDER BY planejamentos_objetivos.nome;
 
 ```sql
 SELECT 
-    pessoas.id,
-    pessoas.nome,
-    pessoas.cpf,
-    pessoas.data_nascimento,
-    pessoas.matricula,
-    pessoas.email,
+    usuarios.id,
+    usuarios.nome,
+    usuarios.cpf,
+    usuarios.data_nascimento,
+    usuarios.matricula,
+    usuarios.email,
     unidades.sigla,
     unidades_integrantes_atribuicoes.atribuicao,
-    pessoas.situacao_funcional,
+    usuarios.situacao_funcional,
     perfis.nome AS perfil,
     COUNT(DISTINCT planos_trabalhos.id) AS qtd_planos_trab
-FROM pessoas
-LEFT JOIN unidades_integrantes ON unidades_integrantes.usuario_id = pessoas.id
+FROM usuarios
+LEFT JOIN unidades_integrantes ON unidades_integrantes.usuario_id = usuarios.id
 LEFT JOIN unidades_integrantes_atribuicoes ON unidades_integrantes_atribuicoes.unidade_integrante_id = unidades_integrantes.id
 LEFT JOIN unidades ON unidades.id = unidades_integrantes.unidade_id
-JOIN perfis ON perfis.id = pessoas.perfil_id
-LEFT JOIN planos_trabalhos ON planos_trabalhos.usuario_id = pessoas.id
-WHERE pessoas.deleted_at IS NULL
-GROUP BY pessoas.id, unidades.sigla, unidades_integrantes_atribuicoes.atribuicao
-ORDER BY pessoas.nome;
+JOIN perfis ON perfis.id = usuarios.perfil_id
+LEFT JOIN planos_trabalhos ON planos_trabalhos.usuario_id = usuarios.id
+WHERE usuarios.deleted_at IS NULL
+GROUP BY usuarios.id, unidades.sigla, unidades_integrantes_atribuicoes.atribuicao
+ORDER BY usuarios.nome;
 ```
 
 ### 2.2 Busca de Pessoas com Filtros
@@ -99,32 +99,32 @@ ORDER BY pessoas.nome;
 
 ```sql
 SELECT 
-    pessoas.id,
-    pessoas.nome,
-    pessoas.cpf,
-    pessoas.data_nascimento,
-    pessoas.matricula,
-    pessoas.email,
+    usuarios.id,
+    usuarios.nome,
+    usuarios.cpf,
+    usuarios.data_nascimento,
+    usuarios.matricula,
+    usuarios.email,
     unidades.sigla,
     unidades_integrantes_atribuicoes.atribuicao,
-    pessoas.situacao_funcional,
+    usuarios.situacao_funcional,
     perfis.nome AS perfil,
     perfis.id AS perfil_id,
     COUNT(DISTINCT planos_trabalhos.id) AS qtd_planos_trab
-FROM pessoas
-LEFT JOIN unidades_integrantes ON unidades_integrantes.usuario_id = pessoas.id
+FROM usuarios
+LEFT JOIN unidades_integrantes ON unidades_integrantes.usuario_id = usuarios.id
 LEFT JOIN unidades_integrantes_atribuicoes ON unidades_integrantes_atribuicoes.unidade_integrante_id = unidades_integrantes.id
 LEFT JOIN unidades ON unidades.id = unidades_integrantes.unidade_id
-JOIN perfis ON perfis.id = pessoas.perfil_id
-LEFT JOIN planos_trabalhos ON planos_trabalhos.usuario_id = pessoas.id
-WHERE pessoas.deleted_at IS NULL
-  AND pessoas.nome LIKE ?
+JOIN perfis ON perfis.id = usuarios.perfil_id
+LEFT JOIN planos_trabalhos ON planos_trabalhos.usuario_id = usuarios.id
+WHERE usuarios.deleted_at IS NULL
+  AND usuarios.nome LIKE ?
   AND unidades.id LIKE ?
-  AND pessoas.situacao_funcional LIKE ?
+  AND usuarios.situacao_funcional LIKE ?
   AND perfis.id LIKE ?
   AND unidades_integrantes_atribuicoes.atribuicao LIKE ?
-GROUP BY pessoas.id, unidades.sigla, unidades_integrantes_atribuicoes.atribuicao
-ORDER BY pessoas.nome;
+GROUP BY usuarios.id, unidades.sigla, unidades_integrantes_atribuicoes.atribuicao
+ORDER BY usuarios.nome;
 ```
 
 ### 2.3 Consulta Planos de Trabalho por Pessoa
@@ -149,12 +149,12 @@ SELECT DISTINCT
     planos_trabalhos.carga_horaria,
     planos_trabalhos.forma_contagem_carga_horaria,
     planos_trabalhos.status,
-    pessoas.nome,
+    usuarios.nome,
     unidades.sigla,
     tipos_modalidades.nome AS forma,
     avaliacoes_pt.qtd_aval
 FROM planos_trabalhos
-JOIN pessoas ON pessoas.id = planos_trabalhos.usuario_id
+JOIN usuarios ON usuarios.id = planos_trabalhos.usuario_id
 LEFT JOIN planos_trabalhos_entregas ON planos_trabalhos_entregas.plano_trabalho_id = planos_trabalhos.id
 LEFT JOIN planos_entregas_entregas ON planos_entregas_entregas.id = planos_trabalhos_entregas.plano_entrega_entrega_id
 LEFT JOIN unidades ON unidades.id = planos_trabalhos.unidade_id
@@ -179,7 +179,7 @@ ORDER BY nome;
 
 -- Busca situações funcionais distintas
 SELECT DISTINCT situacao_funcional AS situ 
-FROM pessoas 
+FROM usuarios 
 ORDER BY situacao_funcional;
 
 -- Busca atribuições distintas
@@ -383,14 +383,14 @@ SELECT DISTINCT
     tipos_modalidades.nome AS forma,
     avaliacoes_pt.qtd_aval
 FROM planos_trabalhos
-JOIN pessoas ON pessoas.id = planos_trabalhos.usuario_id
+JOIN usuarios ON usuarios.id = planos_trabalhos.usuario_id
 JOIN planos_trabalhos_entregas ON planos_trabalhos_entregas.plano_trabalho_id = planos_trabalhos.id
 JOIN planos_entregas_entregas ON planos_entregas_entregas.id = planos_trabalhos_entregas.plano_entrega_entrega_id
 JOIN unidades ON unidades.id = planos_trabalhos.unidade_id
 JOIN tipos_modalidades ON tipos_modalidades.id = planos_trabalhos.tipo_modalidade_id
 LEFT JOIN avaliacoes_pt ON avaliacoes_pt.plano_trabalho_id = planos_trabalhos.id
 WHERE planos_entregas_entregas.plano_entrega_id = ?
-ORDER BY pessoas.nome;
+ORDER BY usuarios.nome;
 ```
 
 ---
@@ -430,21 +430,21 @@ SELECT
     planos_trabalhos.status,
     tipos_modalidades.nome AS forma,
     planos_trabalhos.data_envio_api_pgd,
-    pessoas.nome,
+    usuarios.nome,
     unidades.sigla,
     planos_trabalhos.status AS situacao,
     CASE WHEN planos_trabalhos.data_fim < CURRENT_DATE THEN 's' ELSE 'n' END AS vencido,
     trabalhos.qtd_trabalhos,
     avaliacoes_pt.qtd_aval
 FROM planos_trabalhos
-JOIN pessoas ON pessoas.id = planos_trabalhos.usuario_id
+JOIN usuarios ON usuarios.id = planos_trabalhos.usuario_id
 JOIN unidades ON unidades.id = planos_trabalhos.unidade_id
 JOIN tipos_modalidades ON tipos_modalidades.id = planos_trabalhos.tipo_modalidade_id
 LEFT JOIN trabalhos ON trabalhos.plano_trabalho_id = planos_trabalhos.id
 LEFT JOIN avaliacoes_pt ON avaliacoes_pt.plano_trabalho_id = planos_trabalhos.id
 WHERE planos_trabalhos.deleted_at IS NULL
   AND planos_trabalhos.status LIKE ?
-ORDER BY planos_trabalhos.status, unidades.sigla, pessoas.nome, planos_trabalhos.data_inicio;
+ORDER BY planos_trabalhos.status, unidades.sigla, usuarios.nome, planos_trabalhos.data_inicio;
 ```
 
 ### 5.2 Consulta Trabalhos (Atividades) de um Plano
@@ -486,8 +486,8 @@ SELECT
 FROM planos_trabalhos_consolidacoes
 JOIN avaliacoes ON avaliacoes.plano_trabalho_consolidacao_id = planos_trabalhos_consolidacoes.id
 JOIN planos_trabalhos ON planos_trabalhos.id = planos_trabalhos_consolidacoes.plano_trabalho_id
-LEFT JOIN pessoas ON pessoas.id = avaliacoes.avaliador_id
-JOIN pessoas AS avaliados ON avaliados.id = planos_trabalhos.usuario_id
+LEFT JOIN usuarios AS pessoas ON pessoas.id = avaliacoes.avaliador_id
+JOIN usuarios AS avaliados ON avaliados.id = planos_trabalhos.usuario_id
 WHERE avaliacoes.data_avaliacao <= CURRENT_DATE
   AND avaliacoes.deleted_at IS NULL
   AND planos_trabalhos_consolidacoes.plano_trabalho_id = ?;
@@ -533,14 +533,14 @@ SELECT
     envio_itens.erros,
     envio_itens.created_at,
     planos_trabalhos.numero,
-    pessoas.nome AS pt_dono,
+    usuarios.nome AS pt_dono,
     planos_trabalhos.status AS status_pt
 FROM envio_itens
 LEFT JOIN planos_trabalhos ON planos_trabalhos.id = envio_itens.uid
-LEFT JOIN pessoas ON pessoas.id = planos_trabalhos.usuario_id
+LEFT JOIN usuarios ON usuarios.id = planos_trabalhos.usuario_id
 WHERE envio_itens.sucesso = 0
   AND envio_itens.tipo = 'trabalho'
-ORDER BY CAST(envio_itens.created_at AS DATE) DESC, pessoas.nome;
+ORDER BY CAST(envio_itens.created_at AS DATE) DESC, usuarios.nome;
 ```
 
 ### 6.3 Envios Mal Sucedidos - Participantes
@@ -556,13 +556,13 @@ SELECT
     envio_itens.sucesso,
     envio_itens.erros,
     envio_itens.created_at,
-    pessoas.nome AS participante_nome,
-    pessoas.matricula
+    usuarios.nome AS participante_nome,
+    usuarios.matricula
 FROM envio_itens
-LEFT JOIN pessoas ON pessoas.id = envio_itens.uid
+LEFT JOIN usuarios ON usuarios.id = envio_itens.uid
 WHERE envio_itens.sucesso = 0
   AND envio_itens.tipo = 'participante'
-ORDER BY CAST(envio_itens.created_at AS DATE) DESC, pessoas.nome;
+ORDER BY CAST(envio_itens.created_at AS DATE) DESC, usuarios.nome;
 ```
 
 ---
@@ -581,7 +581,7 @@ ORDER BY CAST(envio_itens.created_at AS DATE) DESC, pessoas.nome;
 - **Índices**: Recomendado criar índices nos campos mais consultados (id, deleted_at, datas)
 
 ### Principais Tabelas do Sistema
-- `pessoas` - Usuários/servidores do sistema
+- `usuarios` - Usuários/servidores do sistema
 - `unidades` - Estrutura organizacional
 - `planos_entregas` - Planos de entrega institucionais
 - `planos_trabalhos` - Planos de trabalho individuais
